@@ -1,7 +1,7 @@
 --[[
 	Feral UI Library  (combined)
 	Look  : original Feral library (Gotham fonts, accent header lines, checkbox toggles, glow, custom cursor)
-	Layout: 650x450 window, sub tabs, 2-column sections. Top bar and sidebar are identical to the original Feral.
+	Layout: 650x450 window, sub tabs, stacked sections. Top bar and sidebar are identical to the original Feral.
 
 	local Library = loadstring(...)()
 	local Window  = Library:Window({
@@ -17,7 +17,7 @@
 
 	local Tab     = Window:AddTab("Main")                          -- sidebar tabs have no icons
 	local SubTab  = Tab:AddSubTab("Farming")
-	local Section = SubTab:AddSection("Auto Farm", "Left")         -- "Left" | "Right"
+	local Section = SubTab:AddSection("Auto Farm")                 -- sections stack under each other
 
 	Old-API shortcut (one tab + one sub tab, sections auto-balance between the columns):
 	local Page    = Window:CreatePage("Main", "Main Tab")
@@ -1428,14 +1428,16 @@ function Library:Window(cfg)
 			accent(ul, "BackgroundColor3")
 
 			local page = new("Frame", { Name = SubTitle .. "_Page", Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Visible = false, Parent = pages })
-			local function column(xScale, xOffset)
-				return new("ScrollingFrame", { Position = UDim2.new(xScale, xOffset, 0, 0), Size = UDim2.new(0.5, -3, 1, 0), BackgroundTransparency = 1,
+			-- one full-width column: sections stack under each other like the original Feral
+			local function column()
+				return new("ScrollingFrame", { Position = UDim2.new(0, 0, 0, 0), Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1,
 					BorderSizePixel = 0, ScrollBarThickness = 3, ScrollBarImageColor3 = T.SliderLine, Active = true, CanvasSize = UDim2.new(),
 					AutomaticCanvasSize = Enum.AutomaticSize.Y, Parent = page },
 					{ new("UIListLayout", { SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 5) }),
 					  new("UIPadding", { PaddingRight = UDim.new(0, 5) }) })
 			end
-			local columns = { Left = column(0, 0), Right = column(0.5, 3) }
+			local mainColumn = column()
+			local columns = { Left = mainColumn, Right = mainColumn }   -- "Left"/"Right" still accepted, both go in the same column
 
 			function Sub:_Deselect()
 				page.Visible = false
@@ -1463,7 +1465,7 @@ function Library:Window(cfg)
 				Sub.Counts[Side] = Sub.Counts[Side] + 1
 
 				local sec = new("Frame", { Name = secName .. "_Section", Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
-					BackgroundColor3 = T.Bg3, BorderSizePixel = 0, LayoutOrder = Sub.Counts[Side], Parent = columns[Side] },
+					BackgroundColor3 = T.Bg3, BorderSizePixel = 0, LayoutOrder = Sub.Counts.Left + Sub.Counts.Right, Parent = columns[Side] },
 					{ corner(4), new("UIListLayout", { SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 5) }),
 					  new("UIPadding", { PaddingBottom = UDim.new(0, 5) }) })
 
