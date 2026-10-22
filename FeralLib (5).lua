@@ -371,7 +371,7 @@ function Cursor.Set(key, on)
 end
 
 --------------------------------------------------------------------
--- Notifications (stacked; the "Example" card shown while the window is open can be dragged to move them)
+-- Notifications (stacked at the top right)
 --------------------------------------------------------------------
 local notiGui, notiHolder
 local notiCount = 0
@@ -608,19 +608,7 @@ function Library:Window(cfg)
 	end)
 
 	----------------------------------------------------------------
-	-- Draggable notification demo
 	----------------------------------------------------------------
-	local demoCard
-	if cfg.NotifyDemo ~= false then
-		ensureNoti()
-		local demoInner
-		demoCard, demoInner = buildNotiCard("Example", "Drag me to reposition notifications", false)
-		demoCard.Name = "NotificationDemo"
-		demoCard.LayoutOrder = -1000
-		demoCard.Parent = notiHolder
-		draggable(demoInner, notiHolder, wconnect, function() return Window.Open end)
-	end
-
 	-- custom cursor follows the window: shown while open, normal Roblox cursor when closed/unloaded
 	local cursorKey = {}
 	Cursor.Set(cursorKey, useCursor)
@@ -630,7 +618,6 @@ function Library:Window(cfg)
 		if self.Open == v then return end
 		self.Open = v
 		Cursor.Set(cursorKey, v and useCursor)
-		if demoCard then demoCard.Visible = v end
 		if v then
 			main.Visible = true
 			main.Position = CLOSED_POS
@@ -650,7 +637,6 @@ function Library:Window(cfg)
 		for _, c in ipairs(winConns) do pcall(function() c:Disconnect() end) end
 		winConns = {}
 		Cursor.Set(cursorKey, false)
-		if demoCard then demoCard:Destroy() end
 		gui:Destroy()
 		for i, w in ipairs(Library.Windows) do
 			if w == Window then table.remove(Library.Windows, i) break end
