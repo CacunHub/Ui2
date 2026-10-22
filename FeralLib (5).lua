@@ -499,7 +499,7 @@ function Library:Window(cfg)
 		SliceScale = 1.3, ZIndex = 0, Parent = main })
 	accent(glow, "ImageColor3")
 
-	local body = new("Frame", { Name = "Body", Size = UDim2.fromScale(1, 1), BackgroundColor3 = T.Bg3, BorderSizePixel = 0, ZIndex = 1,
+	local body = new("Frame", { Name = "Body", Size = UDim2.fromScale(1, 1), BackgroundColor3 = T.Bg1, BorderSizePixel = 0, ZIndex = 1,
 		Parent = main }, { corner(4) })
 
 	----------------------------------------------------------------
@@ -535,7 +535,7 @@ function Library:Window(cfg)
 	-- Sidebar (same as the original Feral: 180px, title, tabs with the accent line) + content card
 	----------------------------------------------------------------
 	local side = new("Frame", { Name = "Sidebar", Position = UDim2.fromOffset(5, 30), Size = UDim2.fromOffset(180, 416), BackgroundColor3 = T.Bg1,
-		BorderSizePixel = 0, Parent = body }, { corner(4), stroke(T.Border, 1.5) })
+		BorderSizePixel = 0, Parent = body }, { corner(4) })
 	text(side, { Position = UDim2.fromOffset(5, 0), Size = UDim2.new(1, 0, 0, 25), Text = tostring(cfg.Title or "Feral") })
 	local tabScroll = new("ScrollingFrame", { Position = UDim2.fromOffset(0, 30), Size = UDim2.new(1, -5, 1, -30), BackgroundTransparency = 1,
 		BorderSizePixel = 0, ScrollBarThickness = 5, Active = true, CanvasSize = UDim2.new(), Parent = side })
