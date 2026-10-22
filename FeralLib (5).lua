@@ -8,12 +8,9 @@
 		Title = "Feral Hub" (sidebar), Brand = "Feral" (accent word in top bar), Desc = "v1.0" (next to it), Logo = "rbxassetid://...",
 		ToggleKey = Enum.KeyCode.RightShift,   -- default RightShift
 		Cursor = true,                         -- custom cursor while the window is open (false = off)
-		Watermark = true,                      -- draggable watermark (false = off)
 		OnSettings = function() end,           -- optional gear button in the top bar
 	})
 	(Library:CreateMain(cfg) is the same thing.)
-
-	Window:SetWatermark(Text, Logo)
 
 	local Tab     = Window:AddTab("Main")                          -- sidebar tabs have no icons
 	local SubTab  = Tab:AddSubTab("Farming")
@@ -611,26 +608,8 @@ function Library:Window(cfg)
 	end)
 
 	----------------------------------------------------------------
-	-- Watermark + draggable notification demo
+	-- Draggable notification demo
 	----------------------------------------------------------------
-	local watermark, wmText, wmLogo
-	if cfg.Watermark ~= false then
-		watermark = new("Frame", { Name = "Watermark", Position = UDim2.new(0.5, -100, 0.1, 0), Size = UDim2.new(0, 0, 0, 30),
-			AutomaticSize = Enum.AutomaticSize.X, BackgroundColor3 = T.Bg3, BorderSizePixel = 0, Active = true, ZIndex = 5, Parent = gui },
-			{ corner(4), stroke(T.Border, 1.5),
-			  new("UIPadding", { PaddingTop = UDim.new(0, 5), PaddingBottom = UDim.new(0, 5), PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10) }),
-			  new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 5) }) })
-		wmLogo = new("ImageLabel", { Size = UDim2.new(0, 20, 1, 0), BackgroundTransparency = 1, Image = logo, LayoutOrder = 1, ZIndex = 5, Parent = watermark })
-		accent(wmLogo, "ImageColor3")
-		wmText = text(watermark, { Size = UDim2.new(0, 0, 1, 0), AutomaticSize = Enum.AutomaticSize.X, TextSize = 16, Text = winTitle,
-			LayoutOrder = 2, ZIndex = 5 })
-		draggable(watermark, watermark, wconnect, function() return Window.Open end)
-	end
-	function Window:SetWatermark(t, l)
-		if wmText and t then wmText.Text = tostring(t) end
-		if wmLogo and l then wmLogo.Image = l end
-	end
-
 	local demoCard
 	if cfg.NotifyDemo ~= false then
 		ensureNoti()
