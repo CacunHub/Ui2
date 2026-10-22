@@ -1,11 +1,11 @@
 --[[
 	Feral UI Library  (combined)
 	Look  : original Feral library (Gotham fonts, accent header lines, checkbox toggles, glow, custom cursor)
-	Layout: second library (650x450 window, top bar + pills, sidebar tabs with logos, sub tabs, 2-column sections)
+	Layout: 650x450 window, sub tabs, 2-column sections. Top bar and sidebar are identical to the original Feral.
 
 	local Library = loadstring(...)()
 	local Window  = Library:Window({
-		Title = "Feral Hub", GameName = "Grand Piece Online", Logo = "rbxassetid://...",
+		Title = "Feral Hub" (sidebar), Brand = "Feral" (accent word in top bar), Desc = "v1.0" (next to it), Logo = "rbxassetid://...",
 		ToggleKey = Enum.KeyCode.RightShift,   -- default RightShift
 		Cursor = true,                         -- custom cursor while the window is open (false = off)
 		Watermark = true,                      -- draggable watermark (false = off)
@@ -13,11 +13,9 @@
 	})
 	(Library:CreateMain(cfg) is the same thing.)
 
-	Window:AddFPSPill() / AddPingPill() / AddTimePill() / AddCoordsPill() / AddUsernamePill()
-	Window:AddCustomPill(Title, Description, Logo, AccentColor)  -> { Set, SetTitle, SetDescription, SetLogo, SetAccent, Destroy }
 	Window:SetWatermark(Text, Logo)
 
-	local Tab     = Window:AddTab("Main", "rbxassetid://...")      -- logo optional
+	local Tab     = Window:AddTab("Main")                          -- sidebar tabs have no icons
 	local SubTab  = Tab:AddSubTab("Farming")
 	local Section = SubTab:AddSection("Auto Farm", "Left")         -- "Left" | "Right"
 
@@ -78,7 +76,6 @@ local Library = {
 	Assets = {
 		Slice    = "rbxassetid://8068653048",
 		Logo     = "rbxassetid://134323059585110",
-		PillLogo = "rbxassetid://121449270899000",
 		Gear     = "rbxassetid://7397332215",
 		Search   = "rbxassetid://8154282545",
 		Checkbox = "rbxassetid://4552505888",
@@ -506,138 +503,48 @@ function Library:Window(cfg)
 		Parent = main }, { corner(4) })
 
 	----------------------------------------------------------------
-	-- Top bar: hub card + pills (+ optional settings gear)
+	-- Top bar (same as the original Feral): logo + "Brand Desc" + optional settings gear
 	----------------------------------------------------------------
-	local top = new("Frame", { Name = "TopMain", Size = UDim2.new(1, 0, 0, 60), BackgroundTransparency = 1, ClipsDescendants = true, Parent = body })
+	local function rgbTag(c)
+		return string.format("rgb(%d,%d,%d)", math.floor(c.R * 255), math.floor(c.G * 255), math.floor(c.B * 255))
+	end
+	local brand = tostring(cfg.Brand or "Feral")
+	local descText = tostring(cfg.Desc or cfg.GameName or "")
+
+	local top = new("Frame", { Name = "TopMain", Size = UDim2.new(1, 0, 0, 25), BackgroundTransparency = 1, Parent = body })
 	draggable(top, main, wconnect)
-
-	local topList = new("Frame", { Name = "Pills", Position = UDim2.fromOffset(5, 5), Size = UDim2.new(1, -10, 0, 50),
-		BackgroundTransparency = 1, Parent = top },
-		{ new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 5) }) })
-
-	local hub = new("Frame", { Name = "HubInfo", Size = UDim2.fromOffset(162, 50), BackgroundColor3 = T.Bg1, BorderSizePixel = 0,
-		LayoutOrder = 0, Parent = topList }, { corner(4), stroke(T.Border, 1.5) })
-	new("ImageLabel", { Position = UDim2.fromOffset(6, 7), Size = UDim2.fromOffset(36, 36), BackgroundTransparency = 1, Image = logo, Parent = hub })
-	local hubTitle = text(hub, { Position = UDim2.fromOffset(48, 6), Size = UDim2.new(1, -52, 0, 20), TextSize = 16, Text = winTitle,
-		TextTruncate = Enum.TextTruncate.AtEnd })
-	accent(hubTitle, "TextColor3")
-	text(hub, { Position = UDim2.fromOffset(48, 26), Size = UDim2.new(1, -52, 0, 18), TextColor3 = T.Desc, Text = gameName,
-		TextTruncate = Enum.TextTruncate.AtEnd })
+	new("ImageLabel", { Position = UDim2.fromOffset(5, 0), Size = UDim2.fromOffset(25, 25), BackgroundTransparency = 1, Image = logo, Parent = top })
+	local titleLabel = new("TextLabel", { Position = UDim2.fromOffset(35, 0), Size = UDim2.new(1, -70, 1, 0), BackgroundTransparency = 1,
+		Font = Enum.Font.GothamBold, RichText = true, TextSize = 16, TextColor3 = T.Text, TextXAlignment = Enum.TextXAlignment.Left, Parent = top })
+	onAccent(function(c)
+		titleLabel.Text = string.format('<font color="%s">%s</font> %s', rgbTag(c), brand, descText)
+	end)
 
 	if cfg.OnSettings then
-		local settings = new("Frame", { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -5, 0.5, 0), Size = UDim2.fromOffset(30, 30),
-			BackgroundColor3 = T.Bg3, BackgroundTransparency = 0.2, BorderSizePixel = 0, ZIndex = 5, Parent = top }, { corner(4) })
+		local settings = new("Frame", { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 0), Size = UDim2.fromOffset(30, 30),
+			BackgroundTransparency = 1, Parent = top })
 		local gear = new("ImageLabel", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.new(1, -10, 1, -10),
-			BackgroundTransparency = 1, Image = A.Gear, ImageColor3 = T.Icon, ZIndex = 5, Parent = settings })
-		local sb = new("TextButton", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Text = "", ZIndex = 6, Parent = settings })
+			BackgroundTransparency = 1, Image = A.Gear, ImageColor3 = T.Icon, Parent = settings })
+		local sb = new("TextButton", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Text = "", Parent = settings })
 		sb.MouseEnter:Connect(function() tween(gear, { ImageColor3 = T.Accent }, T.T3) end)
 		sb.MouseLeave:Connect(function() tween(gear, { ImageColor3 = T.Icon }, T.T3) end)
 		sb.MouseButton1Click:Connect(function() task.spawn(cfg.OnSettings) end)
 	end
 
-	local pillOrder = 0
-	function Window:AddCustomPill(title, desc, logoId, color)
-		color = color or T.Accent
-		pillOrder = pillOrder + 1
-		local Pill = { Title = title or "Pill", Description = desc or "", Logo = logoId or A.PillLogo, AccentColor = color }
-
-		local frame = new("Frame", { Name = "Pill", Size = UDim2.new(0, 0, 0, 50), AutomaticSize = Enum.AutomaticSize.X, BackgroundColor3 = T.Bg1,
-			BorderSizePixel = 0, LayoutOrder = pillOrder, Parent = topList },
-			{ corner(4), stroke(T.Border, 1.5), new("UIPadding", { PaddingRight = UDim.new(0, 10) }) })
-		local img = new("ImageLabel", { Position = UDim2.fromOffset(6, 7), Size = UDim2.fromOffset(36, 36), BackgroundTransparency = 1,
-			Image = Pill.Logo, ImageColor3 = color, Parent = frame })
-		local t1 = text(frame, { Position = UDim2.fromOffset(48, 6), Size = UDim2.new(0, 0, 0, 20), AutomaticSize = Enum.AutomaticSize.X,
-			TextSize = 16, Text = Pill.Title })
-		local t2 = text(frame, { Position = UDim2.fromOffset(48, 26), Size = UDim2.new(0, 0, 0, 18), AutomaticSize = Enum.AutomaticSize.X,
-			TextColor3 = T.Desc, Text = Pill.Description })
-
-		function Pill:Set(newTitle, newDesc, newLogo)
-			if newTitle ~= nil then self.Title = newTitle t1.Text = tostring(newTitle) end
-			if newDesc ~= nil then self.Description = newDesc t2.Text = tostring(newDesc) end
-			if newLogo ~= nil then self.Logo = newLogo img.Image = newLogo end
-		end
-		function Pill:SetTitle(v) self:Set(v, nil, nil) end
-		function Pill:SetDescription(v) self:Set(nil, v, nil) end
-		function Pill:SetLogo(v) self:Set(nil, nil, v) end
-		function Pill:SetAccent(c) self.AccentColor = c img.ImageColor3 = c end
-		function Pill:Destroy() frame:Destroy() end
-		Pill.Instance = frame
-		return Pill
-	end
-
-	local function pillLoop(pill, interval, fn)
-		task.spawn(function()
-			while Library.Alive and pill.Instance.Parent do
-				pcall(fn)
-				task.wait(interval)
-			end
-		end)
-	end
-
-	function Window:AddFPSPill(color)
-		local pill = self:AddCustomPill("FPS", "--", nil, color or Color3.fromRGB(0, 200, 100))
-		task.spawn(function()
-			while Library.Alive and pill.Instance.Parent do
-				local frames, start = 0, os.clock()
-				while os.clock() - start < 0.5 do
-					RunService.RenderStepped:Wait()
-					frames = frames + 1
-				end
-				pill:SetDescription(tostring(math.floor(frames / (os.clock() - start) + 0.5)))
-			end
-		end)
-		return pill
-	end
-
-	function Window:AddPingPill(color)
-		local pill = self:AddCustomPill("Ping", "-- ms", nil, color or Color3.fromRGB(255, 180, 60))
-		local Stats = game:GetService("Stats")
-		pillLoop(pill, 1, function()
-			local ok, ping = pcall(function() return Stats.Network.ServerStatsItem["Data Ping"]:GetValue() end)
-			pill:SetDescription(ok and ping and (math.floor(ping) .. " ms") or "-- ms")
-		end)
-		return pill
-	end
-
-	function Window:AddTimePill(color)
-		local pill = self:AddCustomPill("Time", "--:--:--", nil, color or Color3.fromRGB(180, 120, 255))
-		pillLoop(pill, 1, function()
-			local t = os.date("*t")
-			pill:SetDescription(string.format("%02d:%02d:%02d", t.hour, t.min, t.sec))
-		end)
-		return pill
-	end
-
-	function Window:AddCoordsPill(color)
-		local pill = self:AddCustomPill("Coords", "0, 0, 0", nil, color or Color3.fromRGB(80, 200, 255))
-		pillLoop(pill, 0.1, function()
-			local char = player.Character
-			local root = char and char:FindFirstChild("HumanoidRootPart")
-			if root then
-				local p = root.Position
-				pill:SetDescription(string.format("%d, %d, %d", p.X, p.Y, p.Z))
-			else
-				pill:SetDescription("--")
-			end
-		end)
-		return pill
-	end
-
-	function Window:AddUsernamePill(color)
-		return self:AddCustomPill("User", "@" .. player.Name, nil, color or Color3.fromRGB(255, 100, 150))
-	end
-
 	----------------------------------------------------------------
-	-- Sidebar + content card
+	-- Sidebar (same as the original Feral: 180px, title, tabs with the accent line) + content card
 	----------------------------------------------------------------
-	local side = new("Frame", { Name = "Sidebar", Position = UDim2.fromOffset(5, 60), Size = UDim2.fromOffset(165, 385), BackgroundColor3 = T.Bg1,
+	local side = new("Frame", { Name = "Sidebar", Position = UDim2.fromOffset(5, 30), Size = UDim2.fromOffset(180, 416), BackgroundColor3 = T.Bg1,
 		BorderSizePixel = 0, Parent = body }, { corner(4), stroke(T.Border, 1.5) })
-	local tabScroll = new("ScrollingFrame", { Position = UDim2.fromOffset(0, 5), Size = UDim2.new(1, 0, 1, -10), BackgroundTransparency = 1,
-		BorderSizePixel = 0, ScrollBarThickness = 0, Active = true, CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.Y, Parent = side },
-		{ new("UIListLayout", { SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 5) }),
-		  new("UIPadding", { PaddingLeft = UDim.new(0, 5), PaddingRight = UDim.new(0, 5) }) })
+	text(side, { Position = UDim2.fromOffset(5, 0), Size = UDim2.new(1, 0, 0, 25), Text = tostring(cfg.Title or "Feral") })
+	local tabScroll = new("ScrollingFrame", { Position = UDim2.fromOffset(0, 30), Size = UDim2.new(1, -5, 1, -30), BackgroundTransparency = 1,
+		BorderSizePixel = 0, ScrollBarThickness = 5, Active = true, CanvasSize = UDim2.new(), Parent = side })
+	local tabLayout = new("UIListLayout", { SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 5), Parent = tabScroll })
+	tabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		tabScroll.CanvasSize = UDim2.fromOffset(0, tabLayout.AbsoluteContentSize.Y + 5)
+	end)
 
-	local card = new("Frame", { Name = "Content", Position = UDim2.fromOffset(175, 60), Size = UDim2.fromOffset(470, 385), BackgroundColor3 = T.Bg1,
+	local card = new("Frame", { Name = "Content", Position = UDim2.fromOffset(190, 30), Size = UDim2.fromOffset(456, 416), BackgroundColor3 = T.Bg1,
 		BorderSizePixel = 0, Parent = body }, { corner(4) })
 
 	-- search box (filters the sections of the open sub tab by name)
@@ -1475,23 +1382,19 @@ function Library:Window(cfg)
 	----------------------------------------------------------------
 	-- Tabs -> sub tabs -> sections
 	----------------------------------------------------------------
-	function Window:AddTab(Title, Logo)
+	function Window:AddTab(Title)
 		Title = tostring(Title or "Tab")
 		local Tab = { Title = Title, Subs = {}, SelectedSub = nil }
-		local hasLogo = Logo ~= nil and Logo ~= ""
-
-		local row = new("Frame", { Name = Title .. "_Tab", Size = UDim2.new(1, 0, 0, 30), BackgroundColor3 = T.Bg2, BackgroundTransparency = 1,
-			BorderSizePixel = 0, LayoutOrder = #Window.Tabs + 1, Parent = tabScroll }, { corner(4) })
-		local bar = new("Frame", { AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, 4, 0.5, 0), Size = UDim2.new(0, 3, 0, 0), BorderSizePixel = 0,
-			Parent = row }, { corner(2) })
+		
+		local row = new("Frame", { Name = Title .. "_Tab", Size = UDim2.new(1, -10, 0, 25), BackgroundTransparency = 1, LayoutOrder = #Window.Tabs + 1, Parent = tabScroll })
+		local inner = new("Frame", { Position = UDim2.fromOffset(5, 0), Size = UDim2.new(1, -5, 1, 0), BackgroundTransparency = 1, Parent = row })
+		local line = new("Frame", { AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.fromScale(0, 0.5), Size = UDim2.new(0, 14, 1, 0),
+			BackgroundTransparency = 1, Parent = inner })
+		local bar = new("Frame", { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.fromScale(0.5, 1), Size = UDim2.new(1, -10, 0, 0),
+			BorderSizePixel = 0, Parent = line }, { corner(2) })
 		accent(bar, "BackgroundColor3")
-		if hasLogo then
-			new("ImageLabel", { Position = UDim2.fromOffset(14, 4), Size = UDim2.fromOffset(22, 22), BackgroundTransparency = 1, Image = Logo,
-				ImageColor3 = T.Icon, Parent = row })
-		end
-		local nameLabel = text(row, { Position = UDim2.fromOffset(hasLogo and 42 or 16, 0), Size = UDim2.new(1, hasLogo and -47 or -21, 1, 0),
-			Text = Title, TextColor3 = T.Desc, TextTruncate = Enum.TextTruncate.AtEnd })
-		local tabBtn = new("TextButton", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Text = "", Parent = row })
+		text(inner, { Position = UDim2.fromOffset(15, 0), Size = UDim2.new(1, -15, 1, 0), Text = Title })
+		local tabBtn = new("TextButton", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Text = "", Parent = inner })
 
 		local content = new("Frame", { Name = Title .. "_Content", Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Visible = false, Parent = card })
 		local subBar = new("Frame", { Name = "SubTabs", Position = UDim2.fromOffset(5, 0), Size = UDim2.new(1, -35, 0, 30), BackgroundTransparency = 1, Parent = content },
@@ -1502,18 +1405,14 @@ function Library:Window(cfg)
 
 		function Tab:_Deselect()
 			content.Visible = false
-			tween(bar, { Size = UDim2.new(0, 3, 0, 0) })
-			tween(row, { BackgroundTransparency = 1 })
-			tween(nameLabel, { TextColor3 = T.Desc })
+			tween(bar, { Size = UDim2.new(1, -10, 0, 0), Position = UDim2.fromScale(0.5, 1), AnchorPoint = Vector2.new(0.5, 1) })
 		end
 		function Tab:Select()
 			local prev = Window.SelectedTab
 			if prev and prev ~= Tab then prev:_Deselect() end
 			Window.SelectedTab = Tab
 			content.Visible = true
-			tween(bar, { Size = UDim2.new(0, 3, 0, 18) })
-			tween(row, { BackgroundTransparency = 0.5 })
-			tween(nameLabel, { TextColor3 = T.Text })
+			tween(bar, { Size = UDim2.new(1, -10, 1, -10), Position = UDim2.fromScale(0.5, 0.5), AnchorPoint = Vector2.new(0.5, 0.5) })
 			applySearch()
 		end
 		tabBtn.MouseButton1Click:Connect(function() Tab:Select() end)
