@@ -94,9 +94,12 @@ local A = Library.Assets
 --------------------------------------------------------------------
 -- Helpers
 --------------------------------------------------------------------
+-- every ScreenGui is parented through here: gethui() first, then CoreGui / PlayerGui as fallbacks
 local function getParent()
-	local ok, h = pcall(function() return gethui and gethui() end)
-	if ok and h then return h end
+	if gethui then
+		local ok, h = pcall(gethui)
+		if ok and h then return h end
+	end
 	local ok2 = pcall(function() return game:GetService("CoreGui").Name end)
 	if ok2 then return game:GetService("CoreGui") end
 	return player:WaitForChild("PlayerGui")
@@ -1350,7 +1353,7 @@ function Library:Window(cfg)
 	function Window:AddTab(Title)
 		Title = tostring(Title or "Tab")
 		local Tab = { Title = Title, Subs = {}, SelectedSub = nil }
-		
+
 		local row = new("Frame", { Name = Title .. "_Tab", Size = UDim2.new(1, -10, 0, 25), BackgroundTransparency = 1, LayoutOrder = #Window.Tabs + 1, Parent = tabScroll })
 		local inner = new("Frame", { Position = UDim2.fromOffset(5, 0), Size = UDim2.new(1, -5, 1, 0), BackgroundTransparency = 1, Parent = row })
 		local line = new("Frame", { AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.fromScale(0, 0.5), Size = UDim2.new(0, 14, 1, 0),
