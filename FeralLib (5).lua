@@ -2,7 +2,7 @@
 	Feral UI Library  (combined)
 	Look  : original Feral library (Gotham fonts, accent header lines, checkbox toggles, glow, custom cursor)
 	Layout: 650x450 window, sub tabs, stacked sections. Top bar and sidebar are identical to the original Feral.
-	Extra : the imported picture (rbxassetid://108168557846394) is part of the window: 678x200, centered above the window.
+	Extra : the imported picture (rbxassetid://99715520142149) is part of the window: 1194x612, centered on the window (58px up).
 	        Window({ ImportedImage = false }) turns it off, Window({ ImportedImage = "rbxassetid://..." }) swaps it.
 
 	local Library = loadstring(...)()
@@ -82,7 +82,7 @@ local Library = {
 		Check    = "rbxassetid://4555411759",
 		Arrow    = "rbxassetid://6954383209",
 		Cursor   = "rbxassetid://112328791874559",
-		Imported = "rbxassetid://108168557846394",
+		Imported = "rbxassetid://99715520142149",
 	},
 	Windows = {},
 	Flags = {},       -- flag -> raw value (what the config saves)
@@ -507,11 +507,11 @@ function Library:Window(cfg)
 		Parent = main }, { corner(4) })
 
 	-- imported picture: part of the window (child of Main, so it moves / slides / hides with it).
-	-- Same size and spot as in the Studio layout: 678x200, horizontally centered, centre 63px above the window's top edge
+	-- Same size and spot as in the Studio layout: 1194x612, horizontally centered, centre 58px above the window's centre
 	-- (that is exactly where it sat on an 801px-high screen), drawn on top of the window.
 	if cfg.ImportedImage ~= false then
-		new("ImageLabel", { Name = "ImportedImage", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, 0, 0, -63),
-			Size = UDim2.fromOffset(678, 200), BackgroundTransparency = 1,
+		new("ImageLabel", { Name = "ImportedImage", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, 0, 0.5, -58),
+			Size = UDim2.fromOffset(1194, 612), BackgroundTransparency = 1,
 			Image = (type(cfg.ImportedImage) == "string" and cfg.ImportedImage) or A.Imported,
 			ScaleType = Enum.ScaleType.Fit, Parent = main })
 	end
