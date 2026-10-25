@@ -2,7 +2,7 @@
 	Feral UI Library  (combined)
 	Look  : original Feral library (Gotham fonts, accent header lines, checkbox toggles, glow, custom cursor)
 	Layout: 650x450 window, sub tabs, stacked sections. Top bar and sidebar are identical to the original Feral.
-	Extra : the imported picture (rbxassetid://108168557846394) is part of the window, centered, 200x200.
+	Extra : the imported picture (rbxassetid://108168557846394) is part of the window: 678x200, centered above the window.
 	        Window({ ImportedImage = false }) turns it off, Window({ ImportedImage = "rbxassetid://..." }) swaps it.
 
 	local Library = loadstring(...)()
@@ -505,10 +505,12 @@ function Library:Window(cfg)
 	local body = new("Frame", { Name = "Body", Size = UDim2.fromScale(1, 1), BackgroundColor3 = T.Bg1, BorderSizePixel = 0, ZIndex = 1,
 		Parent = main }, { corner(4) })
 
-	-- imported picture: part of the window, centered (same spot as in the Studio mock-up), drawn on top of the window
+	-- imported picture: part of the window (child of Main, so it moves / slides / hides with it).
+	-- Same size and spot as in the Studio layout: 678x200, horizontally centered, centre 63px above the window's top edge
+	-- (that is exactly where it sat on an 801px-high screen), drawn on top of the window.
 	if cfg.ImportedImage ~= false then
-		new("ImageLabel", { Name = "ImportedImage", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
-			Size = UDim2.fromOffset(200, 200), BackgroundTransparency = 1,
+		new("ImageLabel", { Name = "ImportedImage", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, 0, 0, -63),
+			Size = UDim2.fromOffset(678, 200), BackgroundTransparency = 1,
 			Image = (type(cfg.ImportedImage) == "string" and cfg.ImportedImage) or A.Imported,
 			ScaleType = Enum.ScaleType.Fit, Parent = main })
 	end
