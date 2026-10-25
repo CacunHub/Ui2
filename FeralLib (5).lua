@@ -2,6 +2,8 @@
 	Feral UI Library  (combined)
 	Look  : original Feral library (Gotham fonts, accent header lines, checkbox toggles, glow, custom cursor)
 	Layout: 650x450 window, sub tabs, stacked sections. Top bar and sidebar are identical to the original Feral.
+	Extra : the imported picture (rbxassetid://108168557846394) is part of the window, centered, 200x200.
+	        Window({ ImportedImage = false }) turns it off, Window({ ImportedImage = "rbxassetid://..." }) swaps it.
 
 	local Library = loadstring(...)()
 	local Window  = Library:Window({
@@ -79,6 +81,7 @@ local Library = {
 		Check    = "rbxassetid://4555411759",
 		Arrow    = "rbxassetid://6954383209",
 		Cursor   = "rbxassetid://112328791874559",
+		Imported = "rbxassetid://108168557846394",
 	},
 	Windows = {},
 	Flags = {},       -- flag -> raw value (what the config saves)
@@ -501,6 +504,14 @@ function Library:Window(cfg)
 
 	local body = new("Frame", { Name = "Body", Size = UDim2.fromScale(1, 1), BackgroundColor3 = T.Bg1, BorderSizePixel = 0, ZIndex = 1,
 		Parent = main }, { corner(4) })
+
+	-- imported picture: part of the window, centered (same spot as in the Studio mock-up), drawn on top of the window
+	if cfg.ImportedImage ~= false then
+		new("ImageLabel", { Name = "ImportedImage", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
+			Size = UDim2.fromOffset(200, 200), BackgroundTransparency = 1,
+			Image = (type(cfg.ImportedImage) == "string" and cfg.ImportedImage) or A.Imported,
+			ScaleType = Enum.ScaleType.Fit, Parent = main })
+	end
 
 	----------------------------------------------------------------
 	-- Top bar (same as the original Feral): logo + "Brand Desc" + optional settings gear
