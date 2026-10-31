@@ -1,7 +1,7 @@
 --[[
 	Feral UI Library  (combined)
 	Look  : original Feral library (Gotham fonts, accent header lines, checkbox toggles, glow, custom cursor)
-	Layout: 650x450 window, sub tabs, stacked sections. Top bar and sidebar are identical to the original Feral.
+	Layout: 650x450 window, sub tabs (horizontally scrollable), stacked sections. Top bar and sidebar are identical to the original Feral.
 	Extra : the imported picture (rbxassetid://99715520142149) is part of the window: 1194x612, centered on the window (58px up).
 	        Window({ ImportedImage = false }) turns it off, Window({ ImportedImage = "rbxassetid://..." }) swaps it.
 
@@ -15,7 +15,7 @@
 	(Library:CreateMain(cfg) is the same thing.)
 
 	local Tab     = Window:AddTab("Main")                          -- sidebar tabs have no icons
-	local SubTab  = Tab:AddSubTab("Farming")
+	local SubTab  = Tab:AddSubTab("Farming")                       -- too many sub tabs? a scrollbar appears under them
 	local Section = SubTab:AddSection("Auto Farm")                 -- sections stack under each other
 
 	Old-API shortcut (one tab + one sub tab, sections auto-balance between the columns):
@@ -1379,10 +1379,26 @@ function Library:Window(cfg)
 		local tabBtn = new("TextButton", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Text = "", Parent = inner })
 
 		local content = new("Frame", { Name = Title .. "_Content", Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Visible = false, Parent = card })
-		local subBar = new("Frame", { Name = "SubTabs", Position = UDim2.fromOffset(5, 0), Size = UDim2.new(1, -35, 0, 30), BackgroundTransparency = 1, Parent = content },
+
+		-- sub tab bar: horizontal ScrollingFrame, the scrollbar sits under the sub tabs and only shows when they overflow
+		local subBar = new("ScrollingFrame", { Name = "SubTabs", Position = UDim2.fromOffset(5, 0), Size = UDim2.new(1, -35, 0, 36),
+			BackgroundTransparency = 1, BorderSizePixel = 0, Active = true,
+			ScrollingDirection = Enum.ScrollingDirection.X, CanvasSize = UDim2.new(),
+			AutomaticCanvasSize = Enum.AutomaticSize.X,
+			ScrollBarThickness = 3, ScrollBarImageColor3 = T.Accent, ScrollBarImageTransparency = 1,
+			HorizontalScrollBarInset = Enum.ScrollBarInset.None,
+			Parent = content },
 			{ new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 12) }),
 			  new("UIPadding", { PaddingLeft = UDim.new(0, 5) }) })
-		local pages = new("Frame", { Name = "Pages", Position = UDim2.fromOffset(5, 32), Size = UDim2.new(1, -10, 1, -37), BackgroundTransparency = 1,
+		accent(subBar, "ScrollBarImageColor3")
+		local function updateSubBar()
+			local overflow = subBar.AbsoluteCanvasSize.X > subBar.AbsoluteSize.X + 1
+			subBar.ScrollBarImageTransparency = overflow and 0 or 1
+		end
+		subBar:GetPropertyChangedSignal("AbsoluteCanvasSize"):Connect(updateSubBar)
+		subBar:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateSubBar)
+
+		local pages = new("Frame", { Name = "Pages", Position = UDim2.fromOffset(5, 38), Size = UDim2.new(1, -10, 1, -43), BackgroundTransparency = 1,
 			ClipsDescendants = true, Parent = content })
 
 		function Tab:_Deselect()
@@ -1403,7 +1419,7 @@ function Library:Window(cfg)
 			SubTitle = tostring(SubTitle or "Sub Tab")
 			local Sub = { Title = SubTitle, Sections = {}, Tab = Tab, Counts = { Left = 0, Right = 0 } }
 
-			local sbtn = new("TextButton", { Name = SubTitle, Size = UDim2.new(0, 0, 1, 0), AutomaticSize = Enum.AutomaticSize.X, BackgroundTransparency = 1,
+			local sbtn = new("TextButton", { Name = SubTitle, Size = UDim2.new(0, 0, 0, 30), AutomaticSize = Enum.AutomaticSize.X, BackgroundTransparency = 1,
 				AutoButtonColor = false, Font = Enum.Font.GothamBold, Text = SubTitle, TextSize = 14, TextColor3 = T.Desc, LayoutOrder = #Tab.Subs + 1, Parent = subBar })
 			local ul = new("Frame", { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -2), Size = UDim2.new(0, 0, 0, 2), BorderSizePixel = 0,
 				Parent = sbtn }, { corner(1) })
@@ -1434,6 +1450,18 @@ function Library:Window(cfg)
 				tween(ul, { Size = UDim2.new(1, 0, 0, 2) })
 				tween(sbtn, { TextColor3 = T.Text })
 				applySearch()
+				-- scroll the sub tab bar so the selected sub tab is fully visible
+				task.defer(function()
+					local left = sbtn.AbsolutePosition.X - subBar.AbsolutePosition.X + subBar.CanvasPosition.X
+					local right = left + sbtn.AbsoluteSize.X
+					local view = subBar.AbsoluteSize.X
+					local cx = subBar.CanvasPosition.X
+					if left < cx then
+						subBar.CanvasPosition = Vector2.new(math.max(left - 5, 0), 0)
+					elseif right > cx + view then
+						subBar.CanvasPosition = Vector2.new(right - view + 5, 0)
+					end
+				end)
 			end
 			sbtn.MouseButton1Click:Connect(function() Sub:Select() end)
 
